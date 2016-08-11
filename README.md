@@ -1,10 +1,12 @@
 !nstant-markdown-d
 ================
-instant-markdown-d is a small Node.js server that enables instant compilation and previewing of Markup files. A plugin can easily be written for any text editor to interface with it. One currently exists for VIm: https://github.com/suan/vim-instant-markdown
+instant-markdown-d is a small Node.js server that enables instant compilation and previewing of Markup files. A plugin can easily be written for any text editor to interface with it. One currently exists for Vim: https://github.com/meta-inf/vim-instant-markdown
+
+This fork uses pandoc.
 
 Installation
 ------------
-- `[sudo] npm -g install instant-markdown-d`
+- `[sudo] npm link`
 
 REST API
 --------

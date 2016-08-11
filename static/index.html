@@ -14,12 +14,23 @@
       padding: 30px;
     }
   </style>
+  <style type="text/css">code{white-space: pre;}</style>
+<!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css" /> -->
+  <script src="/katex.min.js"></script>
+  <link rel="stylesheet" href="/katex.min.css" />
   <script src="/socket.io/socket.io.js"></script>
   <script>
     var socket = io.connect('http://'+ window.location.host +'/');
     socket.on('connect', function () {
       socket.on('newContent', function(newHTML) {
         document.querySelector(".markdown-body").innerHTML = newHTML;
+        var mathElements = document.getElementsByClassName("math");
+        for (var i=0; i < mathElements.length; i++)
+        {
+          var texText = mathElements[i].firstChild
+            katex.render(texText.data, mathElements[i])
+        }
       });
       socket.on('die', function(newHTML) {
         window.open('', '_self', '');

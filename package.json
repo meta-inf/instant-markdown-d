@@ -4,14 +4,16 @@
   "description": "Instantly-updating Markdown Server",
   "version": "0.1.0",
   "engine": "node",
-  "main": "instant-markdown-d",
+  "main": "instant-markdown-d.js",
   "preferGlobal": "true",
+  "scripts": {
+    "preinstall": "bash download_katex.sh"
+  },
   "bin": {
-    "instant-markdown-d": "./instant-markdown-d"
+    "instant-markdown-d": "./instant-markdown-d.js"
   },
   "dependencies": {
-    "highlight.js": "^8.4.0",
-    "markdown-it": "^3.0.3",
+    "pdc": "^0.2.3",
     "send": "~0.1.0",
     "socket.io": ""
   }

@@ -1,8 +1,6 @@
-#!/bin/sh
-':' //; exec "`command -v nodejs || command -v node`" "$0"
+#!env node
 
-var MarkdownIt = require('markdown-it');
-var hljs = require('highlight.js');
+var pdc = require('pdc');
 var server = require('http').createServer(httpHandler),
     exec = require('child_process').exec,
     io = require('socket.io').listen(server),
@@ -12,23 +10,7 @@ var server = require('http').createServer(httpHandler),
 
 server.listen(8090);
 
-var md = new MarkdownIt({
-  html: true,
-  linkify: true,
-  highlight: function(str, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(lang, str).value;
-      } catch (err) {
-        // Do nothing
-      }
-    } else {
-      return str;
-    }
-  }
-});
-
-function writeMarkdown(input, output) {
+function writeMarkdown(input, output, cb) {
   var body = '';
   input.on('data', function(data) {
     body += data;
@@ -37,7 +19,14 @@ function writeMarkdown(input, output) {
     }
   });
   input.on('end', function() {
-    output.emit('newContent', md.render(body));
+    pdc(body, 'markdown', 'html', ['--katex'], function(e, res) {
+      if (e) 
+        res = 'ERROR: ' + e;
+      
+      output.emit('newContent', res);
+      if (cb)
+        cb();
+    });
   });
 }
 
@@ -45,27 +34,19 @@ function httpHandler(req, res) {
   switch(req.method)
   {
     case 'GET':
-      // Example: /my-repo/raw/master/sub-dir/some.png
-      var githubUrl = req.url.match(/\/[^\/]+\/raw\/[^\/]+\/(.+)/);
-      if (githubUrl) {
-         // Serve the file out of the current working directory
-        send(req, githubUrl[1])
-         .root(process.cwd())
-         .pipe(res);
-        return;
-      }
-
-      // Otherwise serve the file from the directory this module is in
+      // TODO: We should distinguish local images from static resource
+	  
+      // Serve the file from the directory this module is in
       send(req, req.url)
-        .root(__dirname)
+        .root(__dirname + "/static")
         .pipe(res);
       break;
 
-    // case 'HEAD':
+      // case 'HEAD':
       // res.writeHead(200);
       // res.end();
       // exec('open -g http://localhost:8090', function(error, stdout, stderr){
-        // http.request({port: 8090})
+      // http.request({port: 8090})
       // });
       // break;
 
@@ -75,19 +56,19 @@ function httpHandler(req, res) {
       break;
 
     case 'PUT':
-      writeMarkdown(req, socket);
-      res.writeHead(200);
-      res.end();
+      writeMarkdown(req, socket, function(){
+        res.writeHead(200);
+        res.end();
+      });
       break;
 
     default:
   }
 }
 
-io.set('log level', 1);
 io.sockets.on('connection', function(sock){
   socket = sock;
-  process.stdout.write('connection established!');
+  process.stdout.write('connection established!\n');
   writeMarkdown(process.stdin, socket);
   process.stdin.resume();
 });
