@@ -26,10 +26,16 @@
       socket.on('newContent', function(newHTML) {
         document.querySelector(".markdown-body").innerHTML = newHTML;
         var mathElements = document.getElementsByClassName("math");
-        for (var i=0; i < mathElements.length; i++)
-        {
-          var texText = mathElements[i].firstChild
-            katex.render(texText.data, mathElements[i])
+        for (var i=0; i < mathElements.length; i++) {
+          var texText = mathElements[i].firstChild;
+          try {
+            katex.render(texText.data, mathElements[i], { throwOnError: false })
+          } catch(e) { // FIXME: workaround for KaTeX Issue #475
+            var errNode = document.createElement("span");
+            errNode.style.color = "#cc0000";
+            errNode.appendChild(document.createTextNode(e.toString()));
+            mathElements[i].appendChild(errNode);
+          }
         }
       });
       socket.on('die', function(newHTML) {
