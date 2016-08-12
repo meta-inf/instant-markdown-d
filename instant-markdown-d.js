@@ -10,7 +10,7 @@ var server = require('http').createServer(httpHandler),
 
 server.listen(8090);
 
-function writeMarkdown(input, output, cb) {
+function writeMarkdown(input, output) {
   var body = '';
   input.on('data', function(data) {
     body += data;
@@ -23,9 +23,8 @@ function writeMarkdown(input, output, cb) {
       if (e) 
         res = 'ERROR: ' + e;
       
+	  console.log('P1');
       output.emit('newContent', res);
-      if (cb)
-        cb();
     });
   });
 }
@@ -56,10 +55,10 @@ function httpHandler(req, res) {
       break;
 
     case 'PUT':
-      writeMarkdown(req, socket, function(){
-        res.writeHead(200);
-        res.end();
-      });
+      writeMarkdown(req, socket);
+	  console.log('P2');
+	  res.writeHead(200);
+	  res.end();
       break;
 
     default:
